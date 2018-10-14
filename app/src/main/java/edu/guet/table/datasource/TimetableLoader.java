@@ -24,7 +24,7 @@ import edu.guet.table.support.CookieCache;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Function4;
-import javalab.util.AsyncCallback;
+import javalab.util.Callback;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -56,6 +56,7 @@ public final class TimetableLoader implements Timetable
         private String table;
         private String selected;
         private int timeout;
+        private Observable<TimetableCache> cache;
 
         public Builder account(String username, String password)
         {
@@ -71,7 +72,7 @@ public final class TimetableLoader implements Timetable
         }
 
         @UiThread
-        public void async(final AsyncCallback<TimetableLoader> callback)
+        public void async(final Callback<TimetableLoader> callback)
         {
             observable().subscribe(new Observer<TimetableLoader>()
             {

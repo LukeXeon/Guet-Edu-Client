@@ -15,6 +15,8 @@ import com.zhuangfei.timetable.TimetableView;
 import com.zhuangfei.timetable.model.ScheduleEnable;
 import com.zhuangfei.timetable.view.WeekView;
 
+import org.litepal.LitePal;
+
 import java.util.ArrayList;
 
 import edu.guet.table.R;
@@ -25,11 +27,16 @@ import edu.guet.table.viewmodel.CourseAdapter;
 import edu.guet.table.viewmodel.ExperimentalAdapter;
 import edu.guet.table.support.OCR;
 import es.dmoral.toasty.Toasty;
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import javalab.util.AsyncCallback;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+import javalab.util.Callback;
+import javalab.util.Optional;
 
 
 public class MainActivity extends AppCompatActivity
@@ -41,22 +48,22 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        LitePal.initialize(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mWeekView = (WeekView) findViewById(R.id.id_weekview);
-        TimetableCache.observable("1600301122","2018-2019_1");
-
         mTimetableView = (TimetableView) findViewById(R.id.id_timetableView);
         new TimetableLoader.Builder()
                 .account("1600301122", "13878234627")
                 .semester("2018-2019_1")
                 .observable()
-                .doOnNext(new Consumer<Timetable>()
+                .doOnNext(new Consumer<TimetableLoader>()
         {
             @Override
-            public void accept(Timetable mTimetable) throws Exception
+            public void accept(TimetableLoader timetable) throws Exception
             {
-                MainActivity.this.mTimetable = mTimetable;
+                MainActivity.this.mTimetable = timetable;
+                TimetableCache.cache(timetable);
             }
         }).map(new Function<Timetable, ArrayList<ScheduleEnable>>()
         {
@@ -111,13 +118,15 @@ public class MainActivity extends AppCompatActivity
         new OCR(this)
                 .async(BitmapFactory.decodeStream(getResources()
                         .openRawResource(R.raw.test)),
-                        new AsyncCallback<String>()
+                        new Callback<String>()
                         {
                             @Override
                             public void onResult(String s)
                             {
                                 Logger.d(s);
                             }
+
+
                         });
         requestPermissions();
     }

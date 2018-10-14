@@ -1,6 +1,9 @@
 package edu.guet.table.datasource;
 
+import com.orhanobut.logger.Logger;
+
 import org.litepal.LitePal;
+import org.litepal.LitePalDB;
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
@@ -8,7 +11,9 @@ import java.util.Arrays;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import javalab.util.Optional;
 import javalab.util.Tuple2;
 import javalab.util.Tuples;
 
@@ -62,10 +67,9 @@ public final class TimetableCache extends LitePalSupport implements Timetable
         return Arrays.copyOf(experimentals,experimentals.length);
     }
 
-    public static Observable<TimetableCache> observable(String username,String semester)
+    public static Observable<TimetableCache> observable(String username, String semester)
     {
-        return Observable.just(Tuples.create(username, semester))
-                .map(new Function<Tuple2<String, String>, TimetableCache>()
+        return Observable.just(Tuples.create(username, semester)).map(new Function<Tuple2<String, String>, TimetableCache>()
                 {
                     @Override
                     public TimetableCache apply(Tuple2<String, String> objects) throws Exception
@@ -73,6 +77,7 @@ public final class TimetableCache extends LitePalSupport implements Timetable
                         return LitePal.where("username = ? and semester = ?",
                                 objects.item1, objects.item2)
                                 .findFirst(TimetableCache.class);
+
                     }
                 }).subscribeOn(Schedulers.io());
     }

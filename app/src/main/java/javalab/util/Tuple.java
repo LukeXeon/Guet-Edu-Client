@@ -8,6 +8,8 @@ import java.util.Iterator;
 
 public interface Tuple extends Iterable<Object>
 {
+    int length();
+
     Object get(int index);
 
     int indexOf(Object o);

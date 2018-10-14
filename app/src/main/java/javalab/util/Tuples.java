@@ -16,48 +16,46 @@ public final class Tuples
     {
     }
 
-    public static <T> T get(Tuple tuple, int index, Class<T> tClass)
+    public static <T1, T2, T3, T4, T5, T6, T7, TRest extends AbstractTuple>
+    TupleR<T1, T2, T3, T4, T5, T6, T7, TRest>
+    join(Tuple7<T1, T2, T3, T4, T5, T6, T7> tuple, TRest rest)
     {
-        return tClass.cast(tuple.get(index));
+        return new TupleR<>(tuple.item1, tuple.item2, tuple.item3, tuple.item4, tuple.item5, tuple.item6, tuple.item7, rest);
     }
 
-    public static <T> T findFirst(Tuple tuple, Class<T> tClass)
+    public static <T1, T2, T3, T4, T5, T6, T7>
+    Tuple7<T1, T2, T3, T4, T5, T6, T7>
+    join(Tuple6<T1, T2, T3, T4, T5, T6> tuple, T7 item7)
     {
-        for (Object o : tuple)
-        {
-            if (tClass.isInstance(o))
-            {
-                return tClass.cast(o);
-            }
-        }
-        return null;
+        return new Tuple7<>(tuple.item1, tuple.item2, tuple.item3, tuple.item4, tuple.item5, tuple.item6, item7);
     }
 
-    public static <T> T findLast(Tuple tuple, Class<T> tClass)
+    public static <T1, T2, T3, T4, T5, T6>
+    Tuple6<T1, T2, T3, T4, T5, T6>
+    join(Tuple5<T1, T2, T3, T4, T5> tuple, T6 item6)
     {
-        T result = null;
-        for (Object o : tuple)
-        {
-            if (tClass.isInstance(o))
-            {
-                result = tClass.cast(o);
-            }
-        }
-        return result;
+        return new Tuple6<>(tuple.item1, tuple.item2, tuple.item3, tuple.item4, tuple.item5, item6);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T[] findAll(Tuple tuple, Class<T> tClass)
+    public static <T1, T2, T3, T4, T5>
+    Tuple5<T1, T2, T3, T4, T5>
+    join(Tuple4<T1, T2, T3, T4> tuple, T5 item5)
     {
-        LinkedList<T> linkedList = new LinkedList<>();
-        for (Object o:tuple)
-        {
-            if (tClass.isInstance(o))
-            {
-                linkedList.add(tClass.cast(o));
-            }
-        }
-        return linkedList.size() == 0 ? null : (T[]) linkedList.toArray();
+        return new Tuple5<>(tuple.item1, tuple.item2, tuple.item3, tuple.item4,item5);
+    }
+
+    public static <T1, T2, T3, T4>
+    Tuple4<T1, T2, T3, T4>
+    join(Tuple3<T1, T2, T3> tuple, T4 item4)
+    {
+        return new Tuple4<>(tuple.item1, tuple.item2, tuple.item3,item4);
+    }
+
+    public static <T1, T2, T3>
+    Tuple3<T1, T2, T3>
+    join(Tuple2<T1, T2> tuple, T3 item3)
+    {
+        return new Tuple3<>(tuple.item1, tuple.item2, item3);
     }
 
     public static <T1, T2, T3, T4, T5, T6, T7, TRest extends AbstractTuple>

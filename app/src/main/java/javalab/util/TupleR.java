@@ -21,7 +21,7 @@ public final class TupleR<T1,T2,T3,T4,T5,T6,T7,TRest extends AbstractTuple>
 
     public TupleR(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest)
     {
-        super(7 + rest.length);
+        super(7 + rest.length());
         this.item1 = item1;
         this.item2 = item2;
         this.item3 = item3;

@@ -9,11 +9,17 @@ import java.util.NoSuchElementException;
 
 public abstract class AbstractTuple implements Tuple
 {
-    public transient final int length;
+    private transient final int length;
 
     protected AbstractTuple(int length)
     {
         this.length = length;
+    }
+
+    @Override
+    public int length()
+    {
+        return length;
     }
 
     @Override
