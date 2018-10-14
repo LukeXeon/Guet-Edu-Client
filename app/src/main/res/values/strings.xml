@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Table</string>
+    <string name="student_login">http://bkjw2.guet.edu.cn/student/public/login.asp</string>
+</resources>
