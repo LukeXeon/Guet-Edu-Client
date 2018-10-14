@@ -6,7 +6,7 @@ package javalab.util;
  */
 
 //访问器的回调操作,异步执行,但在Main Thread上回调
-public interface Callback<Result>
+public interface AsyncCallback<Result>
 {
     void onResult(Result result);
 }
