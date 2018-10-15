@@ -5,7 +5,7 @@ import com.zhuangfei.timetable.model.ScheduleEnable;
 
 import java.util.ArrayList;
 
-import edu.guet.table.datasource.TimetableLoader;
+import edu.guet.table.datasource.Timetable;
 
 /**
  * Created by Mr.小世界 on 2018/10/10.
@@ -13,9 +13,9 @@ import edu.guet.table.datasource.TimetableLoader;
 
 public final class CourseAdapter implements ScheduleEnable
 {
-    private final TimetableLoader.Course course;
+    private final Timetable.Course course;
 
-    public CourseAdapter(TimetableLoader.Course course)
+    public CourseAdapter(Timetable.Course course)
     {
         this.course = course;
     }

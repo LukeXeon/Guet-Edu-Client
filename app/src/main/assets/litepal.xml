@@ -1,7 +1,7 @@
 <litepal>
     <dbname value="timetable" />
-    <version value="10" />
+    <version value="1" />
     <list>
-        <mapping class="edu.guet.table.datasource.TimetableCache"></mapping>
+        <mapping class="edu.guet.table.datasource.Timetable"></mapping>
     </list>
 </litepal>

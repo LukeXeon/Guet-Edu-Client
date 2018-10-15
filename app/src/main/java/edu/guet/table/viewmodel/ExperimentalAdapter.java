@@ -5,7 +5,7 @@ import com.zhuangfei.timetable.model.ScheduleEnable;
 
 import java.util.ArrayList;
 
-import edu.guet.table.datasource.TimetableLoader;
+import edu.guet.table.datasource.Timetable;
 
 /**
  * Created by Mr.小世界 on 2018/10/12.
@@ -13,9 +13,9 @@ import edu.guet.table.datasource.TimetableLoader;
 
 public final class ExperimentalAdapter implements ScheduleEnable
 {
-    private final TimetableLoader.Experimental experimental;
+    private final Timetable.Experimental experimental;
 
-    public ExperimentalAdapter(TimetableLoader.Experimental experimental)
+    public ExperimentalAdapter(Timetable.Experimental experimental)
     {
         this.experimental = experimental;
     }

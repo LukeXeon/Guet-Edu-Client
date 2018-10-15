@@ -21,22 +21,15 @@ import java.util.ArrayList;
 
 import edu.guet.table.R;
 import edu.guet.table.datasource.Timetable;
-import edu.guet.table.datasource.TimetableCache;
-import edu.guet.table.datasource.TimetableLoader;
 import edu.guet.table.viewmodel.CourseAdapter;
 import edu.guet.table.viewmodel.ExperimentalAdapter;
 import edu.guet.table.support.OCR;
 import es.dmoral.toasty.Toasty;
-import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
-import javalab.util.Callback;
-import javalab.util.Optional;
+import javalab.util.AsyncCallback;
 
 
 public class MainActivity extends AppCompatActivity
@@ -53,17 +46,16 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mWeekView = (WeekView) findViewById(R.id.id_weekview);
         mTimetableView = (TimetableView) findViewById(R.id.id_timetableView);
-        new TimetableLoader.Builder()
+        new Timetable.NetworkLoader()
                 .account("1600301122", "13878234627")
                 .semester("2018-2019_1")
                 .observable()
-                .doOnNext(new Consumer<TimetableLoader>()
+                .doOnNext(new Consumer<Timetable>()
         {
             @Override
-            public void accept(TimetableLoader timetable) throws Exception
+            public void accept(Timetable timetable) throws Exception
             {
                 MainActivity.this.mTimetable = timetable;
-                TimetableCache.cache(timetable);
             }
         }).map(new Function<Timetable, ArrayList<ScheduleEnable>>()
         {
@@ -118,7 +110,7 @@ public class MainActivity extends AppCompatActivity
         new OCR(this)
                 .async(BitmapFactory.decodeStream(getResources()
                         .openRawResource(R.raw.test)),
-                        new Callback<String>()
+                        new AsyncCallback<String>()
                         {
                             @Override
                             public void onResult(String s)

@@ -20,7 +20,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import javalab.util.Callback;
+import javalab.util.AsyncCallback;
 import javalab.util.Callbacks;
 
 /**
@@ -99,7 +99,7 @@ public final class OCR
     }
 
     @UiThread
-    public void async(Bitmap bitmap, final Callback<String> callback)
+    public void async(Bitmap bitmap, final AsyncCallback<String> callback)
     {
         observable(bitmap).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>()

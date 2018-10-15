@@ -11,12 +11,14 @@ import com.alibaba.fastjson.annotation.JSONField;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.litepal.LitePal;
+import org.litepal.annotation.Column;
+import org.litepal.crud.LitePalSupport;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -26,7 +28,7 @@ import edu.guet.table.support.CookieCache;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Function4;
-import javalab.util.Callback;
+import javalab.util.AsyncCallback;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -46,9 +48,84 @@ import javalab.util.Tuples;
  */
 
 
-public final class Timetable
+public final class Timetable extends LitePalSupport
 {
-    public static final class Builder
+    public static final class CacheLoader
+    {
+        private String semester;
+
+        public CacheLoader semester(String semester)
+        {
+            this.semester = semester;
+            return this;
+        }
+
+        @UiThread
+        public void async(final AsyncCallback<Timetable> callback)
+        {
+            observable().observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Timetable>()
+            {
+                @Override
+                public void onSubscribe(Disposable d) {}
+
+                @Override
+                public void onNext(Timetable value)
+                {
+                    Callbacks.safeCallback(callback,value);
+                }
+
+                @Override
+                public void onError(Throwable e)
+                {
+                    Callbacks.safeCallback(callback,null);
+                }
+
+                @Override
+                public void onComplete() {}
+            });
+        }
+
+        public static void clear()
+        {
+            LitePal.deleteAll(Timetable.class);
+        }
+
+        public Observable<Timetable> observable()
+        {
+            check();
+            return build(this);
+        }
+
+        private void check()
+        {
+            Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{4}_(1|2)");
+            if (TextUtils.isEmpty(this.semester)
+                    || !pattern.matcher(this.semester).matches())
+            {
+                throw new IllegalArgumentException(
+                        "semester is empty or illegal format ! (regex = "
+                                + pattern + ")");
+            }
+        }
+
+        public static Observable<Timetable> build(CacheLoader src)
+        {
+            return Observable.just(src).subscribeOn(Schedulers.io())
+                    .map(new Function<CacheLoader, Timetable>()
+                    {
+                        @Override
+                        public Timetable apply(CacheLoader cache) throws Exception
+                        {
+                            return LitePal.where("semester = ?",
+                                    cache.semester)
+                                    .findFirst(Timetable.class);
+                        }
+                    });
+        }
+    }
+
+    public static final class NetworkLoader
     {
         private String username;
         private String password;
@@ -58,23 +135,22 @@ public final class Timetable
         private String table;
         private String selected;
         private int timeout;
-        private Observable<TimetableCache> cache;
 
-        public Builder account(String username, String password)
+        public NetworkLoader account(String username, String password)
         {
             this.username = username;
             this.password = password;
             return this;
         }
 
-        public Builder semester(String semester)
+        public NetworkLoader semester(String semester)
         {
             this.semester = semester;
             return this;
         }
 
         @UiThread
-        public void async(final Callback<Timetable> callback)
+        public void async(final AsyncCallback<Timetable> callback)
         {
             observable().subscribe(new Observer<Timetable>()
             {
@@ -109,25 +185,25 @@ public final class Timetable
             return build(this);
         }
 
-        public Builder login(String login)
+        public NetworkLoader login(String login)
         {
             this.login = login;
             return this;
         }
 
-        public Builder table(String table)
+        public NetworkLoader table(String table)
         {
             this.table = table;
             return this;
         }
 
-        public Builder selected(String selected)
+        public NetworkLoader selected(String selected)
         {
             this.selected = selected;
             return this;
         }
 
-        public Builder timeout(int timeout)
+        public NetworkLoader timeout(int timeout)
         {
             this.timeout = timeout;
             return this;
@@ -194,16 +270,16 @@ public final class Timetable
             return stringBuilder.toString();
         }
 
-        private static Observable<Timetable> build(Builder source)
+        private static Observable<Timetable> build(NetworkLoader source)
         {
-            Observable<Builder> builder = Observable
+            Observable<NetworkLoader> builder = Observable
                     .just(source)
                     .subscribeOn(Schedulers.io());
             Observable<OkHttpClient> loginClient = builder
-                    .map(new Function<Builder, OkHttpClient>()
+                    .map(new Function<NetworkLoader, OkHttpClient>()
                     {
                         @Override
-                        public OkHttpClient apply(Builder builder) throws Exception
+                        public OkHttpClient apply(NetworkLoader builder) throws Exception
                         {
                             try
                             {
@@ -240,11 +316,11 @@ public final class Timetable
                     });
 
             Observable<ArrayList<Selected>> selected
-                    = loginClient.zipWith(builder, new BiFunction<OkHttpClient, Builder, String>()
+                    = loginClient.zipWith(builder, new BiFunction<OkHttpClient, NetworkLoader, String>()
             {
                 @Override
                 public String apply(OkHttpClient client,
-                                    Builder builder) throws Exception
+                                    NetworkLoader builder) throws Exception
                 {
                     try
                     {
@@ -287,12 +363,12 @@ public final class Timetable
             final Observable<Elements> table = loginClient
                     .zipWith(builder,
                             new BiFunction<OkHttpClient,
-                                    Builder,
+                                    NetworkLoader,
                                     String>()
                             {
                                 @Override
                                 public String apply(OkHttpClient client,
-                                                    Builder builder) throws Exception
+                                                    NetworkLoader builder) throws Exception
                                 {
                                     try
                                     {
@@ -500,25 +576,29 @@ public final class Timetable
                             ArrayList<Experimental>,
                             Tuple2<ArrayList<Course>,
                                     ArrayList<Selected>>,
-                            Builder, Timetable>()
+                            NetworkLoader, Timetable>()
                     {
                         @Override
                         public Timetable apply(ArrayList<Answer> answers,
                                                ArrayList<Experimental> experimentals,
                                                Tuple2<ArrayList<Course>,
                                                              ArrayList<Selected>> objects,
-                                               Builder builder) throws Exception
+                                               NetworkLoader loader) throws Exception
                         {
-                            return new Timetable(builder, answers.toArray(new Answer[answers.size()]),
-                                    objects.item2.toArray(new Selected[objects.item2.size()]),
-                                    objects.item1.toArray(new Course[objects.item1.size()]),
-                                    experimentals.toArray(new Experimental[experimentals.size()]));
+                            Timetable timetable = new Timetable();
+                            timetable.semester = loader.semester;
+                            timetable.answers = answers.toArray(new Answer[answers.size()]);
+                            timetable.selects = objects.item2.toArray(new Selected[objects.item2.size()]);
+                            timetable.courses = objects.item1.toArray(new Course[objects.item1.size()]);
+                            timetable.experimentals = experimentals.toArray(new Experimental[experimentals.size()]);
+                            timetable.saveOrUpdate();
+                            return timetable;
                         }
                     }).observeOn(AndroidSchedulers.mainThread());
         }
     }
 
-    public static final class Course
+    public static final class Course extends LitePalSupport
     {
         @JSONField(name = "星期")
         public final int dayOfWeek;
@@ -550,7 +630,7 @@ public final class Timetable
         @JSONField(name = "课程代码")
         public final String code;
 
-        Course(int dayOfWeek, int step, int start, String name,
+        private Course(int dayOfWeek, int step, int start, String name,
                int beginWeek,
                int endWeek,
                String number,
@@ -577,7 +657,7 @@ public final class Timetable
         }
     }
 
-    public static final class Selected
+    public static final class Selected extends LitePalSupport
     {
         @JSONField(name = "课程名")
         public final String name;
@@ -590,7 +670,7 @@ public final class Timetable
         @JSONField(name = "课号")
         public final String number;
 
-        Selected(String name, String teacher, String type, String code, String number)
+        private Selected(String name, String teacher, String type, String code, String number)
         {
             this.name = name;
             this.teacher = teacher;
@@ -606,7 +686,7 @@ public final class Timetable
         }
     }
 
-    public static final class Answer
+    public static final class Answer extends LitePalSupport
     {
         @JSONField(name = "课程代码")
         public final String code;
@@ -627,7 +707,7 @@ public final class Timetable
         @JSONField(name = "时间")
         public final String time;
 
-        Answer(String code,
+        private Answer(String code,
                String number,
                String name,
                String teacher,
@@ -655,7 +735,7 @@ public final class Timetable
         }
     }
 
-    public static final class Experimental
+    public static final class Experimental extends LitePalSupport
     {
         @JSONField(name = "星期")
         public final int dayOfWeek;
@@ -684,7 +764,7 @@ public final class Timetable
         @JSONField(name = "开始")
         public final int start;
 
-        Experimental(int dayOfWeek,
+        private Experimental(int dayOfWeek,
                      String course,
                      int week,
                      String classroom,
@@ -710,6 +790,7 @@ public final class Timetable
         }
     }
 
+    @Column(unique = true)
     private String semester;
     private Course[] courses;
     private Selected[] selects;
@@ -721,10 +802,9 @@ public final class Timetable
         return semester;
     }
 
-
     public Experimental[] getExperimentals()
     {
-        return Arrays.copyOf(experimentals, experimentals.length);
+        return experimentals;
     }
 
     public Answer[] getAnswers()
@@ -744,18 +824,5 @@ public final class Timetable
 
     private Timetable()
     {
-    }
-
-    private Timetable(Builder builder,
-                      Answer[] answers,
-                      Selected[] selects,
-                      Course[] courses,
-                      Experimental[] experimentals)
-    {
-        this.semester = builder.semester;
-        this.answers = answers;
-        this.selects = selects;
-        this.courses = courses;
-        this.experimentals = experimentals;
     }
 }

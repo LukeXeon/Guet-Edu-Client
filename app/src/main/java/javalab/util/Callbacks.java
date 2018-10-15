@@ -8,18 +8,11 @@ import java.util.List;
 
 public final class Callbacks
 {
-    private static Callback<Object> emptyCallback
-            = new Callback<Object>()
-    {
-        @Override
-        public void onResult(Object o) {}
-    };
-
     private Callbacks()
     {
     }
 
-    public static <T> void safeCallback(Callback<T> callback, T value)
+    public static <T> void safeCallback(AsyncCallback<T> callback, T value)
     {
         if (callback != null)
         {
@@ -27,14 +20,4 @@ public final class Callbacks
         }
     }
 
-    public static <T> void firstCallback(Callback<T> callback, List<T> value)
-    {
-        safeCallback(callback, value.get(0));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Callback<T> empty()
-    {
-        return (Callback<T>) emptyCallback;
-    }
 }
