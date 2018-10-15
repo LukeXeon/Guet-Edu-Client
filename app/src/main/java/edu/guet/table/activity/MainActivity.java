@@ -21,15 +21,14 @@ import java.util.ArrayList;
 
 import edu.guet.table.R;
 import edu.guet.table.datasource.Timetable;
+import edu.guet.table.support.ImageNumberLight;
 import edu.guet.table.viewmodel.CourseAdapter;
 import edu.guet.table.viewmodel.ExperimentalAdapter;
-import edu.guet.table.support.OCR;
 import es.dmoral.toasty.Toasty;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import javalab.util.AsyncCallback;
 
 
 public class MainActivity extends AppCompatActivity
@@ -106,20 +105,16 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-
-        new OCR(this)
-                .async(BitmapFactory.decodeStream(getResources()
-                        .openRawResource(R.raw.test)),
-                        new AsyncCallback<String>()
-                        {
-                            @Override
-                            public void onResult(String s)
-                            {
-                                Logger.d(s);
-                            }
+        new Thread()
+        {
+            @Override
+            public void run()
+            {
+               Logger.d(ImageNumberLight.getNumber(BitmapFactory.decodeStream(getResources().openRawResource(R.raw.code)),""));
+            }
+        }.start();
 
 
-                        });
         requestPermissions();
     }
 
