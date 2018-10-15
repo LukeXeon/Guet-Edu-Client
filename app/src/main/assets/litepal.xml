@@ -1,7 +1,12 @@
 <litepal>
-    <dbname value="timetable" />
-    <version value="1" />
+    <dbname value="timetable"/>
+    <version value="2" />
     <list>
-        <mapping class="edu.guet.table.datasource.Timetable"></mapping>
+        <mapping class="edu.guet.table.datasource.Timetable"/>
+        <mapping class="edu.guet.table.datasource.Course"/>
+        <mapping class="edu.guet.table.datasource.Selected"/>
+        <mapping class="edu.guet.table.datasource.Answer"/>
+        <mapping class="edu.guet.table.datasource.Experimental"/>
+        <mapping class="edu.guet.table.datasource.Account"/>
     </list>
 </litepal>

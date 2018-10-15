@@ -5,8 +5,7 @@ import android.support.annotation.UiThread;
 import android.text.TextUtils;
 
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.orhanobut.logger.Logger;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -20,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,25 +65,30 @@ public final class Timetable extends LitePalSupport
         {
             observable().observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Timetable>()
-            {
-                @Override
-                public void onSubscribe(Disposable d) {}
+                    {
+                        @Override
+                        public void onSubscribe(Disposable d)
+                        {
+                        }
 
-                @Override
-                public void onNext(Timetable value)
-                {
-                    Callbacks.safeCallback(callback,value);
-                }
+                        @Override
+                        public void onNext(Timetable value)
+                        {
+                            Callbacks.safeCallback(callback, value);
+                        }
 
-                @Override
-                public void onError(Throwable e)
-                {
-                    Callbacks.safeCallback(callback,null);
-                }
+                        @Override
+                        public void onError(Throwable e)
+                        {
+                            e.printStackTrace();
+                            Callbacks.safeCallback(callback, null);
+                        }
 
-                @Override
-                public void onComplete() {}
-            });
+                        @Override
+                        public void onComplete()
+                        {
+                        }
+                    });
         }
 
         public static void clear()
@@ -117,9 +122,12 @@ public final class Timetable extends LitePalSupport
                         @Override
                         public Timetable apply(CacheLoader cache) throws Exception
                         {
-                            return LitePal.where("semester = ?",
+                            Thread.sleep(10000);
+                            Timetable timetable = LitePal.where("semester = ?",
                                     cache.semester)
                                     .findFirst(Timetable.class);
+                            Logger.d(timetable == null);
+                            return timetable;
                         }
                     });
         }
@@ -350,11 +358,13 @@ public final class Timetable extends LitePalSupport
                     for (int i = 1; i < trs.size() - 1; i++)
                     {
                         Elements tds = trs.get(i).getElementsByTag("td");
-                        buffer.add(new Selected(tds.get(2).text(),
-                                tds.get(3).text(),
-                                tds.get(4).text(),
-                                tds.get(1).text(),
-                                tds.get(0).text()));
+                        Selected selected1 = new Selected();
+                        selected1.name = tds.get(2).text();
+                        selected1.teacher = tds.get(3).text();
+                        selected1.type = tds.get(4).text();
+                        selected1.code = tds.get(1).text();
+                        selected1.number = tds.get(0).text();
+                        buffer.add(selected1);
                     }
                     return buffer;
                 }
@@ -410,15 +420,17 @@ public final class Timetable extends LitePalSupport
                         String teacher = tds.get(3).text();
                         if (!TextUtils.isEmpty(teacher))
                         {
-                            buffer.add(new Answer(tds.get(1).text(),
-                                    tds.get(0).text(),
-                                    tds.get(2).text(),
-                                    teacher,
-                                    tds.get(4).text(),
-                                    Integer.parseInt(tds.get(5).text()),
-                                    Integer.parseInt(tds.get(6).text()),
-                                    Integer.parseInt(tds.get(7).text()),
-                                    tds.get(8).text()));
+                            Answer answer = new Answer();
+                            answer.code = tds.get(1).text();
+                            answer.number = tds.get(0).text();
+                            answer.name = tds.get(2).text();
+                            answer.teacher = teacher;
+                            answer.classroom = tds.get(4).text();
+                            answer.beginWeek = Integer.parseInt(tds.get(5).text());
+                            answer.endWeek = Integer.parseInt(tds.get(6).text());
+                            answer.dayOfWeek = Integer.parseInt(tds.get(7).text());
+                            answer.time = tds.get(8).text();
+                            buffer.add(answer);
                         }
                     }
                     return buffer;
@@ -482,15 +494,17 @@ public final class Timetable extends LitePalSupport
                                         {
                                             for (int value : temp)
                                             {
-                                                buffer.add(new Experimental(dayOfWeek,
-                                                        course,
-                                                        week,
-                                                        classroom,
-                                                        batch,
-                                                        name,
-                                                        major,
-                                                        2,
-                                                        value * 2 - 1));
+                                                Experimental experimental1 = new Experimental();
+                                                experimental1.dayOfWeek = dayOfWeek;
+                                                experimental1.course = course;
+                                                experimental1.week = week;
+                                                experimental1.classroom = classroom;
+                                                experimental1.batch = batch;
+                                                experimental1.name = name;
+                                                experimental1.major = major;
+                                                experimental1.step = 2;
+                                                experimental1.start = value * 2 - 1;
+                                                buffer.add(experimental1);
                                             }
                                             temp.clear();
                                         }
@@ -555,14 +569,18 @@ public final class Timetable extends LitePalSupport
                                             String number = matcher.group(6);
                                             Selected select = getSelectByNumber(selecteds,
                                                     number);
-                                            buffer.add(new Course(j + 1, 2, i * 2 - 1,
-                                                    matcher.group(2).trim(),
-                                                    Integer.parseInt(matcher.group(3)),
-                                                    Integer.parseInt(matcher.group(4)),
-                                                    number,
-                                                    matcher.group(5),
-                                                    select == null ? "" : select.teacher,
-                                                    select == null ? "" : select.code));
+                                            Course course = new Course();
+                                            course.dayOfWeek = j + 1;
+                                            course.step = 2;
+                                            course.start = i * 2 - 1;
+                                            course.name = matcher.group(2).trim();
+                                            course.beginWeek = Integer.parseInt(matcher.group(3));
+                                            course.endWeek = Integer.parseInt(matcher.group(4));
+                                            course.number = number;
+                                            course.classroom = matcher.group(5);
+                                            course.teacher = select == null ? "" : select.teacher;
+                                            course.code = select == null ? "" : select.code;
+                                            buffer.add(course);
                                         }
                                     }
                                 }
@@ -582,15 +600,19 @@ public final class Timetable extends LitePalSupport
                         public Timetable apply(ArrayList<Answer> answers,
                                                ArrayList<Experimental> experimentals,
                                                Tuple2<ArrayList<Course>,
-                                                             ArrayList<Selected>> objects,
+                                                       ArrayList<Selected>> objects,
                                                NetworkLoader loader) throws Exception
                         {
                             Timetable timetable = new Timetable();
                             timetable.semester = loader.semester;
-                            timetable.answers = answers.toArray(new Answer[answers.size()]);
-                            timetable.selects = objects.item2.toArray(new Selected[objects.item2.size()]);
-                            timetable.courses = objects.item1.toArray(new Course[objects.item1.size()]);
-                            timetable.experimentals = experimentals.toArray(new Experimental[experimentals.size()]);
+                            timetable.answers = answers;
+                            timetable.selects = objects.item2;
+                            timetable.courses = objects.item1;
+                            timetable.experimentals = experimentals;
+                            LitePal.saveAll(answers);
+                            LitePal.saveAll(objects.item2);
+                            LitePal.saveAll(objects.item1);
+                            LitePal.saveAll(experimentals);
                             timetable.saveOrUpdate();
                             return timetable;
                         }
@@ -598,226 +620,34 @@ public final class Timetable extends LitePalSupport
         }
     }
 
-    public static final class Course extends LitePalSupport
-    {
-        @JSONField(name = "星期")
-        public final int dayOfWeek;
-
-        @JSONField(name = "节数")
-        public final int step;
-
-        @JSONField(name = "开始")
-        public final int start;
-
-        @JSONField(name = "课程名")
-        public final String name;
-
-        @JSONField(name = "开始周")
-        public final int beginWeek;
-
-        @JSONField(name = "结束周")
-        public final int endWeek;
-
-        @JSONField(name = "课号")
-        public final String number;
-
-        @JSONField(name = "上课地点")
-        public final String classroom;
-
-        @JSONField(name = "教师")
-        public final String teacher;
-
-        @JSONField(name = "课程代码")
-        public final String code;
-
-        private Course(int dayOfWeek, int step, int start, String name,
-               int beginWeek,
-               int endWeek,
-               String number,
-               String classroom,
-               String teacher,
-               String code)
-        {
-            this.dayOfWeek = dayOfWeek;
-            this.step = step;
-            this.start = start;
-            this.name = name;
-            this.beginWeek = beginWeek;
-            this.endWeek = endWeek;
-            this.number = number;
-            this.classroom = classroom;
-            this.teacher = teacher;
-            this.code = code;
-        }
-
-        @Override
-        public String toString()
-        {
-            return JSONObject.toJSONString(this);
-        }
-    }
-
-    public static final class Selected extends LitePalSupport
-    {
-        @JSONField(name = "课程名")
-        public final String name;
-        @JSONField(name = "教师")
-        public final String teacher;
-        @JSONField(name = "类型")
-        public final String type;
-        @JSONField(name = "课程代码")
-        public final String code;
-        @JSONField(name = "课号")
-        public final String number;
-
-        private Selected(String name, String teacher, String type, String code, String number)
-        {
-            this.name = name;
-            this.teacher = teacher;
-            this.type = type;
-            this.code = code;
-            this.number = number;
-        }
-
-        @Override
-        public String toString()
-        {
-            return JSONObject.toJSONString(this);
-        }
-    }
-
-    public static final class Answer extends LitePalSupport
-    {
-        @JSONField(name = "课程代码")
-        public final String code;
-        @JSONField(name = "课号")
-        public final String number;
-        @JSONField(name = "课程名")
-        public final String name;
-        @JSONField(name = "辅导教师")
-        public final String teacher;
-        @JSONField(name = "答疑地点")
-        public final String classroom;
-        @JSONField(name = "开始周")
-        public final int beginWeek;
-        @JSONField(name = "结束周")
-        public final int endWeek;
-        @JSONField(name = "星期")
-        public final int dayOfWeek;
-        @JSONField(name = "时间")
-        public final String time;
-
-        private Answer(String code,
-               String number,
-               String name,
-               String teacher,
-               String classroom,
-               int beginWeek,
-               int endWeek,
-               int dayOfWeek,
-               String time)
-        {
-            this.code = code;
-            this.number = number;
-            this.name = name;
-            this.teacher = teacher;
-            this.classroom = classroom;
-            this.beginWeek = beginWeek;
-            this.endWeek = endWeek;
-            this.dayOfWeek = dayOfWeek;
-            this.time = time;
-        }
-
-        @Override
-        public String toString()
-        {
-            return JSONObject.toJSONString(this);
-        }
-    }
-
-    public static final class Experimental extends LitePalSupport
-    {
-        @JSONField(name = "星期")
-        public final int dayOfWeek;
-
-        @JSONField(name = "课程名")
-        public final String course;
-
-        @JSONField(name = "周")
-        public final int week;
-
-        @JSONField(name = "上课地点")
-        public final String classroom;
-
-        @JSONField(name = "批次")
-        public final int batch;
-
-        @JSONField(name = "实验名称")
-        public final String name;
-
-        @JSONField(name = "开课专业")
-        public final String major;
-
-        @JSONField(name = "节数")
-        public final int step;
-
-        @JSONField(name = "开始")
-        public final int start;
-
-        private Experimental(int dayOfWeek,
-                     String course,
-                     int week,
-                     String classroom,
-                     int batch,
-                     String name,
-                     String major, int step, int start)
-        {
-            this.dayOfWeek = dayOfWeek;
-            this.course = course;
-            this.week = week;
-            this.classroom = classroom;
-            this.batch = batch;
-            this.name = name;
-            this.major = major;
-            this.step = step;
-            this.start = start;
-        }
-
-        @Override
-        public String toString()
-        {
-            return JSONObject.toJSONString(this);
-        }
-    }
-
     @Column(unique = true)
     private String semester;
-    private Course[] courses;
-    private Selected[] selects;
-    private Answer[] answers;
-    private Experimental[] experimentals;
+    private List<Course> courses = new ArrayList<>();
+    private List<Selected> selects = new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
+    private List<Experimental> experimentals = new ArrayList<>();
 
     public String getSemester()
     {
         return semester;
     }
 
-    public Experimental[] getExperimentals()
+    public List<Experimental> getExperimentals()
     {
         return experimentals;
     }
 
-    public Answer[] getAnswers()
+    public List<Answer> getAnswers()
     {
         return answers;
     }
 
-    public Course[] getCourses()
+    public List<Course> getCourses()
     {
         return courses;
     }
 
-    public Selected[] getSelects()
+    public List<Selected> getSelects()
     {
         return selects;
     }

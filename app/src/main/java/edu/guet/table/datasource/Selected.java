@@ -3,6 +3,7 @@ package edu.guet.table.datasource;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 /**
@@ -11,15 +12,17 @@ import org.litepal.crud.LitePalSupport;
 public final class Selected extends LitePalSupport
 {
     @JSONField(name = "课程名")
-    public final String name;
+    String name;
     @JSONField(name = "教师")
-    public final String teacher;
+    String teacher;
     @JSONField(name = "类型")
-    public final String type;
+    String type;
     @JSONField(name = "课程代码")
-    public final String code;
+    String code;
     @JSONField(name = "课号")
-    public final String number;
+    String number;
+
+    Selected() {}
 
     Selected(String name, String teacher, String type, String code, String number)
     {
@@ -28,6 +31,31 @@ public final class Selected extends LitePalSupport
         this.type = type;
         this.code = code;
         this.number = number;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public String getTeacher()
+    {
+        return teacher;
+    }
+
+    public String getCode()
+    {
+        return code;
+    }
+
+    public String getNumber()
+    {
+        return number;
+    }
+
+    public String getType()
+    {
+        return type;
     }
 
     @Override

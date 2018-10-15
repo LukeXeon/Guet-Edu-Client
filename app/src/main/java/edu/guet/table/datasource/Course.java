@@ -3,6 +3,7 @@ package edu.guet.table.datasource;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 /**
@@ -11,53 +12,77 @@ import org.litepal.crud.LitePalSupport;
 public final class Course extends LitePalSupport
 {
     @JSONField(name = "星期")
-    public final int dayOfWeek;
-
+    int dayOfWeek;
     @JSONField(name = "节数")
-    public final int step;
-
+    int step;
     @JSONField(name = "开始")
-    public final int start;
-
+    int start;
     @JSONField(name = "课程名")
-    public final String name;
-
+    String name;
     @JSONField(name = "开始周")
-    public final int beginWeek;
-
+    int beginWeek;
     @JSONField(name = "结束周")
-    public final int endWeek;
-
+    int endWeek;
     @JSONField(name = "课号")
-    public final String number;
-
+    String number;
     @JSONField(name = "上课地点")
-    public final String classroom;
-
+    String classroom;
     @JSONField(name = "教师")
-    public final String teacher;
-
+    String teacher;
     @JSONField(name = "课程代码")
-    public final String code;
+    String code;
 
-    Course(int dayOfWeek, int step, int start, String name,
-           int beginWeek,
-           int endWeek,
-           String number,
-           String classroom,
-           String teacher,
-           String code)
+    Course() {}
+
+
+    public String getTeacher()
     {
-        this.dayOfWeek = dayOfWeek;
-        this.step = step;
-        this.start = start;
-        this.name = name;
-        this.beginWeek = beginWeek;
-        this.endWeek = endWeek;
-        this.number = number;
-        this.classroom = classroom;
-        this.teacher = teacher;
-        this.code = code;
+        return teacher;
+    }
+
+    public String getNumber()
+    {
+        return number;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public String getCode()
+    {
+        return code;
+    }
+
+    public int getBeginWeek()
+    {
+        return beginWeek;
+    }
+
+    public int getDayOfWeek()
+    {
+        return dayOfWeek;
+    }
+
+    public int getEndWeek()
+    {
+        return endWeek;
+    }
+
+    public int getStart()
+    {
+        return start;
+    }
+
+    public int getStep()
+    {
+        return step;
+    }
+
+    public String getClassroom()
+    {
+        return classroom;
     }
 
     @Override

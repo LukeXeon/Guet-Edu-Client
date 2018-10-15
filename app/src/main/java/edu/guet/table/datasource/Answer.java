@@ -3,6 +3,7 @@ package edu.guet.table.datasource;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 /**
@@ -11,43 +12,72 @@ import org.litepal.crud.LitePalSupport;
 public final class Answer extends LitePalSupport
 {
     @JSONField(name = "课程代码")
-    public final String code;
+    String code;
     @JSONField(name = "课号")
-    public final String number;
+    String number;
     @JSONField(name = "课程名")
-    public final String name;
+    String name;
     @JSONField(name = "辅导教师")
-    public final String teacher;
+    String teacher;
     @JSONField(name = "答疑地点")
-    public final String classroom;
+    String classroom;
     @JSONField(name = "开始周")
-    public final int beginWeek;
+    int beginWeek;
     @JSONField(name = "结束周")
-    public final int endWeek;
+    int endWeek;
     @JSONField(name = "星期")
-    public final int dayOfWeek;
+    int dayOfWeek;
     @JSONField(name = "时间")
-    public final String time;
+    String time;
 
-    Answer(String code,
-           String number,
-           String name,
-           String teacher,
-           String classroom,
-           int beginWeek,
-           int endWeek,
-           int dayOfWeek,
-           String time)
+    Answer()
     {
-        this.code = code;
-        this.number = number;
-        this.name = name;
-        this.teacher = teacher;
-        this.classroom = classroom;
-        this.beginWeek = beginWeek;
-        this.endWeek = endWeek;
-        this.dayOfWeek = dayOfWeek;
-        this.time = time;
+    }
+
+
+    public int getBeginWeek()
+    {
+        return beginWeek;
+    }
+
+    public int getDayOfWeek()
+    {
+        return dayOfWeek;
+    }
+
+    public int getEndWeek()
+    {
+        return endWeek;
+    }
+
+    public String getClassroom()
+    {
+        return classroom;
+    }
+
+    public String getCode()
+    {
+        return code;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public String getNumber()
+    {
+        return number;
+    }
+
+    public String getTeacher()
+    {
+        return teacher;
+    }
+
+    public String getTime()
+    {
+        return time;
     }
 
     @Override

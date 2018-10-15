@@ -3,6 +3,7 @@ package edu.guet.table.activity;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -20,8 +21,10 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 
 import edu.guet.table.R;
+import edu.guet.table.datasource.Course;
+import edu.guet.table.datasource.Experimental;
 import edu.guet.table.datasource.Timetable;
-import edu.guet.table.support.ImageNumberLight;
+import edu.guet.table.support.CodeParser;
 import edu.guet.table.viewmodel.CourseAdapter;
 import edu.guet.table.viewmodel.ExperimentalAdapter;
 import es.dmoral.toasty.Toasty;
@@ -29,6 +32,7 @@ import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import javalab.util.AsyncCallback;
 
 
 public class MainActivity extends AppCompatActivity
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         LitePal.initialize(this);
+        SQLiteDatabase database= LitePal.getDatabase();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mWeekView = (WeekView) findViewById(R.id.id_weekview);
@@ -61,12 +66,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public ArrayList<ScheduleEnable> apply(Timetable mTimetable) throws Exception
             {
+                Logger.d(LitePal.findFirst(Timetable.class,true).getCourses().size());
                 ArrayList<ScheduleEnable> scheduleEnables = new ArrayList<>();
-                for (Timetable.Course course : mTimetable.getCourses())
+                for (Course course : mTimetable.getCourses())
                 {
                     scheduleEnables.add(new CourseAdapter(course));
                 }
-                for (Timetable.Experimental experimental: mTimetable.getExperimentals())
+                for (Experimental experimental: mTimetable.getExperimentals())
                 {
                     scheduleEnables.add(new ExperimentalAdapter(experimental));
                 }
@@ -89,6 +95,7 @@ public class MainActivity extends AppCompatActivity
             {
                 mTimetableView.source(value).curWeek(8).showView();
                 dialog.dismiss();
+
                 Toasty.success(MainActivity.this, "加载成功").show();
             }
 
@@ -96,6 +103,7 @@ public class MainActivity extends AppCompatActivity
             public void onError(Throwable e)
             {
                 dialog.dismiss();
+                e.printStackTrace();
                 Toasty.error(MainActivity.this, "加载失败").show();
             }
 
@@ -110,9 +118,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run()
             {
-               Logger.d(ImageNumberLight.getNumber(BitmapFactory.decodeStream(getResources().openRawResource(R.raw.code)),""));
+               Logger.d(CodeParser.parse(BitmapFactory.decodeStream(getResources().openRawResource(R.raw.code))));
+
             }
         }.start();
+
+
+
+
 
 
         requestPermissions();

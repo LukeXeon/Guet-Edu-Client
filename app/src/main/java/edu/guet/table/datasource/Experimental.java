@@ -3,6 +3,7 @@ package edu.guet.table.datasource;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
+import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
 
 /**
@@ -11,49 +12,71 @@ import org.litepal.crud.LitePalSupport;
 public final class Experimental extends LitePalSupport
 {
     @JSONField(name = "星期")
-    public final int dayOfWeek;
-
+    int dayOfWeek;
     @JSONField(name = "课程名")
-    public final String course;
-
+    String course;
     @JSONField(name = "周")
-    public final int week;
-
+    int week;
     @JSONField(name = "上课地点")
-    public final String classroom;
-
+    String classroom;
     @JSONField(name = "批次")
-    public final int batch;
-
+    int batch;
     @JSONField(name = "实验名称")
-    public final String name;
-
+    String name;
     @JSONField(name = "开课专业")
-    public final String major;
-
+    String major;
     @JSONField(name = "节数")
-    public final int step;
-
+    int step;
     @JSONField(name = "开始")
-    public final int start;
+    int start;
 
-    Experimental(int dayOfWeek,
-                 String course,
-                 int week,
-                 String classroom,
-                 int batch,
-                 String name,
-                 String major, int step, int start)
+    Experimental()
     {
-        this.dayOfWeek = dayOfWeek;
-        this.course = course;
-        this.week = week;
-        this.classroom = classroom;
-        this.batch = batch;
-        this.name = name;
-        this.major = major;
-        this.step = step;
-        this.start = start;
+    }
+
+    public String getClassroom()
+    {
+        return classroom;
+    }
+
+    public int getStep()
+    {
+        return step;
+    }
+
+    public int getStart()
+    {
+        return start;
+    }
+
+    public int getBatch()
+    {
+        return batch;
+    }
+
+    public int getDayOfWeek()
+    {
+        return dayOfWeek;
+    }
+
+    public int getWeek()
+    {
+        return week;
+    }
+
+    public String getCourse()
+    {
+        return course;
+    }
+
+    public String getMajor()
+    {
+        return major;
+    }
+
+    public String getName()
+    {
+        return name;
     }
 
     @Override

@@ -5,7 +5,7 @@ import com.zhuangfei.timetable.model.ScheduleEnable;
 
 import java.util.ArrayList;
 
-import edu.guet.table.datasource.Timetable;
+import edu.guet.table.datasource.Course;
 
 /**
  * Created by Mr.小世界 on 2018/10/10.
@@ -13,9 +13,9 @@ import edu.guet.table.datasource.Timetable;
 
 public final class CourseAdapter implements ScheduleEnable
 {
-    private final Timetable.Course course;
+    private final Course course;
 
-    public CourseAdapter(Timetable.Course course)
+    public CourseAdapter(Course course)
     {
         this.course = course;
     }
@@ -24,18 +24,18 @@ public final class CourseAdapter implements ScheduleEnable
     public Schedule getSchedule()
     {
         Schedule schedule = new Schedule();
-        schedule.setName(course.name);
-        schedule.setRoom(course.classroom);
-        schedule.setTeacher(course.teacher);
+        schedule.setName(course.getName());
+        schedule.setRoom(course.getClassroom());
+        schedule.setTeacher(course.getTeacher());
         ArrayList<Integer> list = new ArrayList<>();
-        for (int i = course.beginWeek; i <= course.endWeek; i++)
+        for (int i = course.getBeginWeek(); i <= course.getEndWeek(); i++)
         {
             list.add(i);
         }
         schedule.setWeekList(list);
-        schedule.setDay(course.dayOfWeek);
-        schedule.setStart(course.start);
-        schedule.setStep(course.step);
+        schedule.setDay(course.getDayOfWeek());
+        schedule.setStart(course.getStart());
+        schedule.setStep(course.getStep());
         return schedule;
     }
 }

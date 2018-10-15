@@ -5,7 +5,7 @@ import com.zhuangfei.timetable.model.ScheduleEnable;
 
 import java.util.ArrayList;
 
-import edu.guet.table.datasource.Timetable;
+import edu.guet.table.datasource.Experimental;
 
 /**
  * Created by Mr.小世界 on 2018/10/12.
@@ -13,9 +13,9 @@ import edu.guet.table.datasource.Timetable;
 
 public final class ExperimentalAdapter implements ScheduleEnable
 {
-    private final Timetable.Experimental experimental;
+    private final Experimental experimental;
 
-    public ExperimentalAdapter(Timetable.Experimental experimental)
+    public ExperimentalAdapter(Experimental experimental)
     {
         this.experimental = experimental;
     }
@@ -25,15 +25,15 @@ public final class ExperimentalAdapter implements ScheduleEnable
     public Schedule getSchedule()
     {
         Schedule schedule = new Schedule();
-        schedule.setStart(experimental.start);
-        schedule.setStep(experimental.step);
+        schedule.setStart(experimental.getStart());
+        schedule.setStep(experimental.getStep());
         schedule.setWeekList(new ArrayList<Integer>()
         {{
-            add(experimental.week);
+            add(experimental.getWeek());
         }});
-        schedule.setDay(experimental.dayOfWeek);
-        schedule.setName("[实验]" + experimental.course);
-        schedule.setRoom(experimental.classroom);
+        schedule.setDay(experimental.getDayOfWeek());
+        schedule.setName("[实验]" + experimental.getCourse());
+        schedule.setRoom(experimental.getClassroom());
         return schedule;
     }
 }
