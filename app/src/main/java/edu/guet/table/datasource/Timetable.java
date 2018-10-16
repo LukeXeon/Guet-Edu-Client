@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.litepal.LitePal;
 import org.litepal.annotation.Column;
+import org.litepal.annotation.Encrypt;
 import org.litepal.crud.LitePalSupport;
 
 import java.io.BufferedReader;
@@ -53,6 +54,13 @@ public final class Timetable extends LitePalSupport
     public static final class CacheLoader
     {
         private String semester;
+        private String username;
+
+        public CacheLoader username(String username)
+        {
+            this.username = username;
+            return this;
+        }
 
         public CacheLoader semester(String semester)
         {
@@ -91,9 +99,12 @@ public final class Timetable extends LitePalSupport
                     });
         }
 
-        public static void clear()
+        public void clear()
         {
-            LitePal.deleteAll(Timetable.class);
+            LitePal.deleteAll(Timetable.class,
+                    "username = ? and semester = ?",
+                    username,
+                    semester);
         }
 
         public Observable<Timetable> observable()
@@ -104,6 +115,10 @@ public final class Timetable extends LitePalSupport
 
         private void check()
         {
+            if (TextUtils.isEmpty(username))
+            {
+                throw new IllegalArgumentException();
+            }
             Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{4}_(1|2)");
             if (TextUtils.isEmpty(this.semester)
                     || !pattern.matcher(this.semester).matches())
@@ -122,15 +137,13 @@ public final class Timetable extends LitePalSupport
                         @Override
                         public Timetable apply(CacheLoader cache) throws Exception
                         {
-                            Thread.sleep(10000);
-                            Timetable timetable = LitePal.where("semester = ?",
-                                    cache.semester)
+                            return LitePal.where("username = ? and semester = ?",
+                                    cache.username, cache.semester)
                                     .findFirst(Timetable.class);
-                            Logger.d(timetable == null);
-                            return timetable;
                         }
                     });
         }
+
     }
 
     public static final class NetworkLoader
@@ -603,29 +616,30 @@ public final class Timetable extends LitePalSupport
                                                        ArrayList<Selected>> objects,
                                                NetworkLoader loader) throws Exception
                         {
+                            LitePal.deleteAll(Timetable.class,
+                                    "username = ? and semester = ?",
+                                    loader.username,
+                                    loader.semester);
                             Timetable timetable = new Timetable();
+                            timetable.username = loader.username;
                             timetable.semester = loader.semester;
                             timetable.answers = answers;
                             timetable.selects = objects.item2;
                             timetable.courses = objects.item1;
                             timetable.experimentals = experimentals;
-                            LitePal.saveAll(answers);
-                            LitePal.saveAll(objects.item2);
-                            LitePal.saveAll(objects.item1);
-                            LitePal.saveAll(experimentals);
-                            timetable.saveOrUpdate();
+                            timetable.save();
                             return timetable;
                         }
                     }).observeOn(AndroidSchedulers.mainThread());
         }
     }
 
-    @Column(unique = true)
+    private String username;
     private String semester;
-    private List<Course> courses = new ArrayList<>();
-    private List<Selected> selects = new ArrayList<>();
-    private List<Answer> answers = new ArrayList<>();
-    private List<Experimental> experimentals = new ArrayList<>();
+    private List<Course> courses;
+    private List<Selected> selects;
+    private List<Answer> answers;
+    private List<Experimental> experimentals;
 
     public String getSemester()
     {
@@ -650,6 +664,16 @@ public final class Timetable extends LitePalSupport
     public List<Selected> getSelects()
     {
         return selects;
+    }
+
+    @Override
+    public boolean save()
+    {
+        LitePal.saveAll(answers);
+        LitePal.saveAll(courses);
+        LitePal.saveAll(selects);
+        LitePal.saveAll(experimentals);
+        return super.save();
     }
 
     private Timetable()

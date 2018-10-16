@@ -13,9 +13,7 @@ public final class Account extends LitePalSupport
     Account() {}
 
     @Column(unique = true)
-    @Encrypt(algorithm = AES)
     private String username;
-    @Encrypt(algorithm = AES)
     private String password;
     public String getUsername()
     {

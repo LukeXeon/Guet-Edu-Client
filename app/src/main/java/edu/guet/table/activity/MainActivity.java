@@ -32,7 +32,6 @@ import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import javalab.util.AsyncCallback;
 
 
 public class MainActivity extends AppCompatActivity
@@ -45,7 +44,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         LitePal.initialize(this);
-        SQLiteDatabase database= LitePal.getDatabase();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mWeekView = (WeekView) findViewById(R.id.id_weekview);
@@ -55,24 +53,25 @@ public class MainActivity extends AppCompatActivity
                 .semester("2018-2019_1")
                 .observable()
                 .doOnNext(new Consumer<Timetable>()
-        {
-            @Override
-            public void accept(Timetable timetable) throws Exception
-            {
-                MainActivity.this.mTimetable = timetable;
-            }
-        }).map(new Function<Timetable, ArrayList<ScheduleEnable>>()
+                {
+                    @Override
+                    public void accept(Timetable timetable) throws Exception
+                    {
+                        MainActivity.this.mTimetable = timetable;
+                    }
+                }).map(new Function<Timetable, ArrayList<ScheduleEnable>>()
         {
             @Override
             public ArrayList<ScheduleEnable> apply(Timetable mTimetable) throws Exception
             {
-                Logger.d(LitePal.findFirst(Timetable.class,true).getCourses().size());
+                Logger.d(LitePal.where("username = ? and semester = ?","1600301122","2018-2019_1")
+                        .find(Timetable.class,true).size());
                 ArrayList<ScheduleEnable> scheduleEnables = new ArrayList<>();
                 for (Course course : mTimetable.getCourses())
                 {
                     scheduleEnables.add(new CourseAdapter(course));
                 }
-                for (Experimental experimental: mTimetable.getExperimentals())
+                for (Experimental experimental : mTimetable.getExperimentals())
                 {
                     scheduleEnables.add(new ExperimentalAdapter(experimental));
                 }
@@ -118,14 +117,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run()
             {
-               Logger.d(CodeParser.parse(BitmapFactory.decodeStream(getResources().openRawResource(R.raw.code))));
+                Logger.d(CodeParser.parse(BitmapFactory.decodeStream(getResources().openRawResource(R.raw.code))));
 
             }
         }.start();
-
-
-
-
 
 
         requestPermissions();
